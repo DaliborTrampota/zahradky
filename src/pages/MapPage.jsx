@@ -1,0 +1,64 @@
+import { createSignal } from 'solid-js'
+import { Show } from 'solid-js'
+import Toolbar from '../components/Toolbar.jsx'
+import GardenMap from '../components/GardenMap.jsx'
+import BedPanel from '../components/BedPanel.jsx'
+import { garden, addBed } from '../store/gardenStore.js'
+
+export default function MapPage() {
+  const [drawMode, setDrawMode] = createSignal(false)
+  const [draftPoints, setDraftPoints] = createSignal([])
+  const [selectedBedId, setSelectedBedId] = createSignal(null)
+  const [panelSide, setPanelSide] = createSignal('right')
+
+  function handleMapClick(percentPoint) {
+    if (!drawMode()) return
+    setDraftPoints((pts) => [...pts, percentPoint])
+  }
+
+  function finishDrawing() {
+    if (draftPoints().length < 3) return
+    addBed(draftPoints())
+    setDraftPoints([])
+    setDrawMode(false)
+  }
+
+  function cancelDrawing() {
+    setDraftPoints([])
+    setDrawMode(false)
+  }
+
+  const selectedBed = () => garden.beds.find((b) => b.id === selectedBedId())
+
+  return (
+    <div class="flex flex-col h-screen bg-stone-100">
+      <Toolbar
+        drawMode={drawMode()}
+        onToggleDraw={() => (drawMode() ? cancelDrawing() : setDrawMode(true))}
+        onFinishDraw={finishDrawing}
+        draftCount={draftPoints().length}
+      />
+      <div class="relative flex-1 overflow-hidden">
+        <GardenMap
+          beds={garden.beds}
+          draftPoints={draftPoints()}
+          drawMode={drawMode()}
+          selectedBedId={selectedBedId()}
+          onMapClick={handleMapClick}
+          onBedClick={(id, xPct) => {
+            setPanelSide(xPct > 50 ? 'left' : 'right')
+            setSelectedBedId(id)
+            setDrawMode(false)
+          }}
+        />
+        <Show when={selectedBed()}>
+          <BedPanel
+            bed={selectedBed()}
+            side={panelSide()}
+            onClose={() => setSelectedBedId(null)}
+          />
+        </Show>
+      </div>
+    </div>
+  )
+}

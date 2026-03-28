@@ -2,19 +2,26 @@ import { createSignal, onMount, onCleanup, For, Show } from 'solid-js'
 import BedPolygon from './BedPolygon.jsx'
 import { toPercent } from '../utils/coords.js'
 
+const MIN_ZOOM = 1
+const MAX_ZOOM = 6
+const ZOOM_STEP = 1.15
+
 export default function GardenMap(props) {
   let outerRef
   let containerRef
   let imgEl
   const [size, setSize] = createSignal(null)
+  const [zoom, setZoom] = createSignal(1)
+  const [pan, setPan] = createSignal({ x: 0, y: 0 })
 
+  // --- Image sizing ---
   function recalc() {
     if (!imgEl || !outerRef || !imgEl.naturalWidth) return
     const outer = outerRef.getBoundingClientRect()
     const natW = imgEl.naturalWidth
     const natH = imgEl.naturalHeight
-    const scale = Math.min(outer.width / natW, outer.height / natH)
-    setSize({ width: Math.floor(natW * scale), height: Math.floor(natH * scale) })
+    const s = Math.min(outer.width / natW, outer.height / natH)
+    setSize({ width: Math.floor(natW * s), height: Math.floor(natH * s) })
   }
 
   onMount(() => {
@@ -24,25 +31,107 @@ export default function GardenMap(props) {
     if (imgEl.complete) recalc()
   })
 
+  // --- Wheel: pinch = zoom, scroll = pan ---
+  function handleWheel(e) {
+    e.preventDefault()
+    if (e.ctrlKey || e.metaKey) {
+      // Pinch-to-zoom on touchpad (or Ctrl+scroll with mouse)
+      const rect = outerRef.getBoundingClientRect()
+      const mx = e.clientX - rect.left
+      const my = e.clientY - rect.top
+      const factor = e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP
+      applyZoom(factor, mx, my)
+    } else {
+      // Two-finger scroll → pan
+      setPan((p) => ({ x: p.x - e.deltaX, y: p.y - e.deltaY }))
+    }
+  }
+
+  function applyZoom(factor, pivotX, pivotY) {
+    const oldZ = zoom()
+    const newZ = Math.min(Math.max(oldZ * factor, MIN_ZOOM), MAX_ZOOM)
+    if (newZ === oldZ) return
+    const p = pan()
+    setPan({
+      x: pivotX - (pivotX - p.x) * (newZ / oldZ),
+      y: pivotY - (pivotY - p.y) * (newZ / oldZ),
+    })
+    setZoom(newZ)
+  }
+
+  function resetView() {
+    setZoom(1)
+    setPan({ x: 0, y: 0 })
+  }
+
+  // --- Pan (drag) ---
+  let dragging = false
+  let dragStart = { x: 0, y: 0 }
+  let panStart = { x: 0, y: 0 }
+  let dragMoved = false
+
+  function handlePointerDown(e) {
+    if (props.drawMode) return
+    if (e.button !== 0) return
+    // Only start drag from the map area itself, not from child controls
+    if (e.target.closest('button')) return
+    dragging = true
+    dragMoved = false
+    dragStart = { x: e.clientX, y: e.clientY }
+    panStart = { ...pan() }
+    window.addEventListener('pointermove', handlePointerMove)
+    window.addEventListener('pointerup', handlePointerUp, { once: true })
+  }
+
+  function handlePointerMove(e) {
+    if (!dragging) return
+    const dx = e.clientX - dragStart.x
+    const dy = e.clientY - dragStart.y
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragMoved = true
+    if (dragMoved) {
+      setPan({ x: panStart.x + dx, y: panStart.y + dy })
+    }
+  }
+
+  function handlePointerUp() {
+    dragging = false
+    window.removeEventListener('pointermove', handlePointerMove)
+  }
+
+  // --- Draw click ---
   function handleDrawClick(e) {
     const rect = containerRef.getBoundingClientRect()
     props.onMapClick(toPercent(e.clientX, e.clientY, rect))
   }
 
-  // Convert stored percent coords (0-100) to SVG pixel coords
+  // --- SVG helpers ---
   const vw = () => size()?.width || 100
   const vh = () => size()?.height || 100
   const pctToSvg = (p) => `${p.x / 100 * vw()},${p.y / 100 * vh()}`
+
+  // --- Transform style ---
+  const transformStyle = () => {
+    if (!size()) return {}
+    return {
+      width: `${size().width}px`,
+      height: `${size().height}px`,
+      transform: `translate(${pan().x}px, ${pan().y}px) scale(${zoom()})`,
+      'transform-origin': '0 0',
+    }
+  }
 
   return (
     <div
       ref={outerRef}
       class="relative flex items-center justify-center w-full h-full bg-zinc-900 dark:bg-zinc-950 overflow-hidden select-none transition-colors duration-200"
+      classList={{ 'cursor-grab': !props.drawMode && !dragging, 'cursor-grabbing': dragging }}
+      onWheel={handleWheel}
+      onPointerDown={handlePointerDown}
     >
       <div
         ref={containerRef}
         class="relative"
-        style={size() ? { width: `${size().width}px`, height: `${size().height}px` } : {}}
+        style={transformStyle()}
       >
         <img
           ref={imgEl}
@@ -67,6 +156,7 @@ export default function GardenMap(props) {
                 vh={vh()}
                 selected={bed.id === props.selectedBedId}
                 onClick={(e) => {
+                  if (dragMoved) return
                   const rect = containerRef.getBoundingClientRect()
                   const xPct = ((e.clientX - rect.left) / rect.width) * 100
                   props.onBedClick(bed.id, xPct)
@@ -109,12 +199,65 @@ export default function GardenMap(props) {
         </Show>
       </div>
 
+      {/* Draw mode hint */}
       <Show when={props.drawMode}>
         <div
           class="absolute top-4 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-sm font-medium px-4 py-1.5 rounded-full shadow-lg pointer-events-none"
-          style="z-index: 3"
+          style="z-index: 10"
         >
           Click to place points &mdash; {props.draftPoints.length} placed
+        </div>
+      </Show>
+
+      {/* Zoom controls */}
+      <div
+        class="absolute bottom-4 right-4 flex flex-col gap-1.5"
+        style="z-index: 10"
+      >
+        <Show when={zoom() !== 1 || pan().x !== 0 || pan().y !== 0}>
+          <button
+            onClick={resetView}
+            class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 shadow-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors duration-150"
+            title="Reset view"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+            </svg>
+          </button>
+        </Show>
+        <button
+          onClick={() => {
+            const rect = outerRef.getBoundingClientRect()
+            applyZoom(ZOOM_STEP, rect.width / 2, rect.height / 2)
+          }}
+          class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 shadow-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors duration-150"
+          title="Zoom in"
+        >
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+        </button>
+        <button
+          onClick={() => {
+            const rect = outerRef.getBoundingClientRect()
+            applyZoom(1 / ZOOM_STEP, rect.width / 2, rect.height / 2)
+          }}
+          class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 shadow-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors duration-150"
+          title="Zoom out"
+        >
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Zoom level indicator */}
+      <Show when={zoom() !== 1}>
+        <div
+          class="absolute bottom-4 left-4 bg-black/50 text-white text-xs font-medium px-2.5 py-1 rounded-full pointer-events-none"
+          style="z-index: 10"
+        >
+          {Math.round(zoom() * 100)}%
         </div>
       </Show>
     </div>

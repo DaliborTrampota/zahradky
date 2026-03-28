@@ -51,6 +51,11 @@ export default function GardenMap(props) {
     const oldZ = zoom()
     const newZ = Math.min(Math.max(oldZ * factor, MIN_ZOOM), MAX_ZOOM)
     if (newZ === oldZ) return
+    if (newZ <= 1) {
+      setPan({ x: 0, y: 0 })
+      setZoom(1)
+      return
+    }
     const p = pan()
     setPan({
       x: pivotX - (pivotX - p.x) * (newZ / oldZ),
@@ -172,8 +177,8 @@ export default function GardenMap(props) {
               points={props.draftPoints.map(pctToSvg).join(' ')}
               fill="rgba(250,204,21,0.25)"
               stroke="#fbbf24"
-              stroke-width="2"
-              stroke-dasharray="8 4"
+              stroke-width={1.5 / zoom()}
+              stroke-dasharray={`${6 / zoom()} ${3 / zoom()}`}
               style="pointer-events: none"
             />
             <For each={props.draftPoints}>
@@ -181,10 +186,10 @@ export default function GardenMap(props) {
                 <circle
                   cx={pt.x / 100 * vw()}
                   cy={pt.y / 100 * vh()}
-                  r="5"
+                  r={3 / zoom()}
                   fill="#fbbf24"
                   stroke="#ffffff"
-                  stroke-width="2"
+                  stroke-width={1 / zoom()}
                   style="pointer-events: none"
                 />
               )}

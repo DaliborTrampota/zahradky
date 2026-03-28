@@ -4,7 +4,7 @@ import { t, currentLang, toggleLang } from '../utils/i18n.js'
 
 export default function Toolbar(props) {
   return (
-    <header class="flex items-center gap-3 px-5 py-3 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 shadow-md shrink-0 transition-colors duration-200">
+    <header class="flex items-center gap-3 px-5 h-14 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 shadow-md shrink-0 transition-colors duration-200">
       <h1 class="text-lg font-semibold text-zinc-800 dark:text-zinc-100 tracking-tight mr-auto">
         {t('appTitle')}
       </h1>

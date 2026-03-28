@@ -37,6 +37,21 @@ export default function Toolbar(props) {
       <div class="w-px h-6 bg-zinc-200 dark:bg-zinc-700" />
 
       <button
+        onClick={props.onToggleLabels}
+        class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-150"
+        classList={{
+          'text-green-600 dark:text-green-400': props.showLabels,
+          'text-zinc-400 dark:text-zinc-500': !props.showLabels,
+        }}
+        title={props.showLabels ? 'Hide labels' : 'Show labels'}
+      >
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+        </svg>
+      </button>
+
+      <button
         onClick={toggleDark}
         class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 transition-colors duration-150"
         title={isDark() ? 'Switch to light mode' : 'Switch to dark mode'}

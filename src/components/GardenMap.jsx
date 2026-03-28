@@ -154,6 +154,8 @@ export default function GardenMap(props) {
                 bed={bed}
                 vw={vw()}
                 vh={vh()}
+                zoom={zoom()}
+                showLabels={props.showLabels}
                 selected={bed.id === props.selectedBedId}
                 onClick={(e) => {
                   if (dragMoved) return

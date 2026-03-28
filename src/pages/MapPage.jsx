@@ -10,6 +10,7 @@ export default function MapPage() {
   const [draftPoints, setDraftPoints] = createSignal([])
   const [selectedBedId, setSelectedBedId] = createSignal(null)
   const [panelSide, setPanelSide] = createSignal('right')
+  const [showLabels, setShowLabels] = createSignal(true)
 
   function handleMapClick(percentPoint) {
     if (!drawMode()) return
@@ -37,12 +38,15 @@ export default function MapPage() {
         onToggleDraw={() => (drawMode() ? cancelDrawing() : setDrawMode(true))}
         onFinishDraw={finishDrawing}
         draftCount={draftPoints().length}
+        showLabels={showLabels()}
+        onToggleLabels={() => setShowLabels((v) => !v)}
       />
       <div class="relative flex-1 overflow-hidden">
         <GardenMap
           beds={garden.beds}
           draftPoints={draftPoints()}
           drawMode={drawMode()}
+          showLabels={showLabels()}
           selectedBedId={selectedBedId()}
           onMapClick={handleMapClick}
           onBedClick={(id, xPct) => {

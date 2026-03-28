@@ -1,5 +1,6 @@
 import { createSignal, For } from 'solid-js'
 import { addPlant, removePlant } from '../store/gardenStore.js'
+import { t } from '../utils/i18n.js'
 
 export default function PlantList(props) {
   const [name, setName] = createSignal('')
@@ -14,13 +15,13 @@ export default function PlantList(props) {
   return (
     <div>
       <h3 class="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-3">
-        Plants
+        {t('plants')}
       </h3>
       <ul class="space-y-1.5 mb-4">
         <For
           each={props.bed.plants}
           fallback={
-            <li class="text-sm text-zinc-400 dark:text-zinc-500 italic py-2">No plants yet</li>
+            <li class="text-sm text-zinc-400 dark:text-zinc-500 italic py-2">{t('noPlantsYet')}</li>
           }
         >
           {(plant) => (
@@ -32,7 +33,7 @@ export default function PlantList(props) {
               <button
                 onClick={() => removePlant(props.bed.id, plant.id)}
                 class="cursor-pointer w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 text-zinc-300 dark:text-zinc-600 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-150 ml-2 shrink-0"
-                title="Remove plant"
+                title={t('removePlant')}
               >
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -45,7 +46,7 @@ export default function PlantList(props) {
       <div class="space-y-2">
         <div class="flex gap-2">
           <input
-            placeholder="Plant name"
+            placeholder={t('plantName')}
             value={name()}
             onInput={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
@@ -62,7 +63,7 @@ export default function PlantList(props) {
           onClick={handleAdd}
           class="cursor-pointer w-full bg-green-600 hover:bg-green-700 active:bg-green-800 text-white rounded-lg px-4 py-2.5 text-sm font-medium shadow-sm hover:shadow-md transition-all duration-150"
         >
-          Add plant
+          {t('addPlant')}
         </button>
       </div>
     </div>

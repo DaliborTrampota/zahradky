@@ -1,6 +1,7 @@
 import { createSignal, onMount, onCleanup, For, Show } from 'solid-js'
 import BedPolygon from './BedPolygon.jsx'
 import { toPercent } from '../utils/coords.js'
+import { t } from '../utils/i18n.js'
 
 const MIN_ZOOM = 1
 const MAX_ZOOM = 6
@@ -141,7 +142,7 @@ export default function GardenMap(props) {
         <img
           ref={imgEl}
           src="/zahradky.png"
-          alt="Garden map"
+          alt={t('gardenMap')}
           class="block w-full h-full"
           style="z-index: 0"
           draggable={false}
@@ -212,7 +213,7 @@ export default function GardenMap(props) {
           class="absolute top-4 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-sm font-medium px-4 py-1.5 rounded-full shadow-lg pointer-events-none"
           style="z-index: 10"
         >
-          Click to place points &mdash; {props.draftPoints.length} placed
+          {t('clickToPlace', props.draftPoints.length)}
         </div>
       </Show>
 
@@ -225,7 +226,7 @@ export default function GardenMap(props) {
           <button
             onClick={resetView}
             class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 shadow-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors duration-150"
-            title="Reset view"
+            title={t('resetView')}
           >
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
@@ -238,7 +239,7 @@ export default function GardenMap(props) {
             applyZoom(ZOOM_STEP, rect.width / 2, rect.height / 2)
           }}
           class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 shadow-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors duration-150"
-          title="Zoom in"
+          title={t('zoomIn')}
         >
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -250,7 +251,7 @@ export default function GardenMap(props) {
             applyZoom(1 / ZOOM_STEP, rect.width / 2, rect.height / 2)
           }}
           class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 shadow-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors duration-150"
-          title="Zoom out"
+          title={t('zoomOut')}
         >
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />

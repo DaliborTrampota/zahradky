@@ -1,10 +1,11 @@
 import BedForm from './BedForm.jsx'
 import PlantList from './PlantList.jsx'
 import { deleteBed } from '../store/gardenStore.js'
+import { t } from '../utils/i18n.js'
 
 export default function BedPanel(props) {
   function handleDelete() {
-    if (confirm(`Delete bed "${props.bed.name}"?`)) {
+    if (confirm(t('confirmDelete', props.bed.name))) {
       deleteBed(props.bed.id)
       props.onClose()
     }
@@ -26,7 +27,7 @@ export default function BedPanel(props) {
         <button
           onClick={props.onClose}
           class="cursor-pointer w-8 h-8 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 dark:text-zinc-500 transition-colors duration-150"
-          title="Close"
+          title={t('close')}
         >
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -45,7 +46,7 @@ export default function BedPanel(props) {
           onClick={handleDelete}
           class="cursor-pointer w-full text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg px-4 py-2.5 transition-colors duration-150"
         >
-          Delete this bed
+          {t('deleteBed')}
         </button>
       </div>
     </aside>

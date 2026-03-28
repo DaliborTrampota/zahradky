@@ -1,24 +1,25 @@
 import { Show } from 'solid-js'
 import { isDark, toggleDark } from '../utils/darkMode.js'
+import { t, currentLang, toggleLang } from '../utils/i18n.js'
 
 export default function Toolbar(props) {
   return (
     <header class="flex items-center gap-3 px-5 py-3 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 shadow-md shrink-0 transition-colors duration-200">
       <h1 class="text-lg font-semibold text-zinc-800 dark:text-zinc-100 tracking-tight mr-auto">
-        Zahradky
+        {t('appTitle')}
       </h1>
 
       <Show when={props.drawMode}>
         <div class="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-full px-4 py-1.5">
           <span class="text-sm font-medium text-amber-700 dark:text-amber-300">
-            {props.draftCount} point{props.draftCount !== 1 ? 's' : ''}
+            {t('points', props.draftCount)}
           </span>
           <button
             onClick={props.onFinishDraw}
             disabled={props.draftCount < 3}
             class="cursor-pointer bg-green-600 hover:bg-green-700 active:bg-green-800 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium px-4 py-1.5 rounded-full shadow-sm hover:shadow-md transition-all duration-150"
           >
-            Finish
+            {t('finish')}
           </button>
         </div>
       </Show>
@@ -31,7 +32,7 @@ export default function Toolbar(props) {
           'bg-green-600 hover:bg-green-700 active:bg-green-800 text-white shadow-sm hover:shadow-md': !props.drawMode,
         }}
       >
-        {props.drawMode ? 'Cancel' : 'Draw bed'}
+        {props.drawMode ? t('cancel') : t('drawBed')}
       </button>
 
       <div class="w-px h-6 bg-zinc-200 dark:bg-zinc-700" />
@@ -43,7 +44,7 @@ export default function Toolbar(props) {
           'text-green-600 dark:text-green-400': props.showLabels,
           'text-zinc-400 dark:text-zinc-500': !props.showLabels,
         }}
-        title={props.showLabels ? 'Hide labels' : 'Show labels'}
+        title={props.showLabels ? t('hideLabels') : t('showLabels')}
       >
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
@@ -52,9 +53,17 @@ export default function Toolbar(props) {
       </button>
 
       <button
+        onClick={toggleLang}
+        class="cursor-pointer h-9 px-2 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide transition-colors duration-150"
+        title={currentLang() === 'cs' ? 'Switch to English' : 'Přepnout do češtiny'}
+      >
+        {currentLang() === 'cs' ? 'EN' : 'CZ'}
+      </button>
+
+      <button
         onClick={toggleDark}
         class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 transition-colors duration-150"
-        title={isDark() ? 'Switch to light mode' : 'Switch to dark mode'}
+        title={isDark() ? t('lightMode') : t('darkMode')}
       >
         <Show
           when={isDark()}

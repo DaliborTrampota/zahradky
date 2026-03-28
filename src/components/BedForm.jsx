@@ -1,5 +1,6 @@
 import { For } from 'solid-js'
 import { updateBed } from '../store/gardenStore.js'
+import { t } from '../utils/i18n.js'
 
 const COLORS = [
   '#4ade80', '#f87171', '#60a5fa', '#fbbf24',
@@ -23,7 +24,7 @@ export default function BedForm(props) {
           for="bed-name"
           class="absolute left-3 top-2 text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide pointer-events-none"
         >
-          Name
+          {t('name')}
         </label>
       </div>
 
@@ -39,13 +40,13 @@ export default function BedForm(props) {
           for="bed-owner"
           class="absolute left-3 top-2 text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide pointer-events-none"
         >
-          Owner
+          {t('owner')}
         </label>
       </div>
 
       <div>
         <span class="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
-          Color
+          {t('color')}
         </span>
         <div class="mt-2 flex gap-2 flex-wrap">
           <For each={COLORS}>

@@ -31,7 +31,7 @@ export default function MapPage() {
   const selectedBed = () => garden.beds.find((b) => b.id === selectedBedId())
 
   return (
-    <div class="flex flex-col h-screen bg-stone-100">
+    <div class="flex flex-col h-screen bg-zinc-100 dark:bg-zinc-950 transition-colors duration-200">
       <Toolbar
         drawMode={drawMode()}
         onToggleDraw={() => (drawMode() ? cancelDrawing() : setDrawMode(true))}

@@ -37,7 +37,7 @@ export default function GardenMap(props) {
   return (
     <div
       ref={outerRef}
-      class="relative flex items-center justify-center w-full h-full bg-stone-800 overflow-hidden select-none"
+      class="relative flex items-center justify-center w-full h-full bg-zinc-900 dark:bg-zinc-950 overflow-hidden select-none transition-colors duration-200"
     >
       <div
         ref={containerRef}
@@ -111,7 +111,7 @@ export default function GardenMap(props) {
 
       <Show when={props.drawMode}>
         <div
-          class="absolute top-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-yellow-900 text-sm font-medium px-3 py-1 rounded-full shadow pointer-events-none"
+          class="absolute top-4 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-sm font-medium px-4 py-1.5 rounded-full shadow-lg pointer-events-none"
           style="z-index: 3"
         >
           Click to place points &mdash; {props.draftPoints.length} placed

@@ -1,82 +1,115 @@
-import { For, Show } from 'solid-js'
+import { createSignal, onMount, onCleanup, For, Show } from 'solid-js'
 import BedPolygon from './BedPolygon.jsx'
 import { toPercent } from '../utils/coords.js'
 
 export default function GardenMap(props) {
+  let outerRef
   let containerRef
+  let imgEl
+  const [size, setSize] = createSignal(null)
+
+  function recalc() {
+    if (!imgEl || !outerRef || !imgEl.naturalWidth) return
+    const outer = outerRef.getBoundingClientRect()
+    const natW = imgEl.naturalWidth
+    const natH = imgEl.naturalHeight
+    const scale = Math.min(outer.width / natW, outer.height / natH)
+    setSize({ width: Math.floor(natW * scale), height: Math.floor(natH * scale) })
+  }
+
+  onMount(() => {
+    const ro = new ResizeObserver(recalc)
+    ro.observe(outerRef)
+    onCleanup(() => ro.disconnect())
+    if (imgEl.complete) recalc()
+  })
 
   function handleDrawClick(e) {
     const rect = containerRef.getBoundingClientRect()
     props.onMapClick(toPercent(e.clientX, e.clientY, rect))
   }
 
+  // Convert stored percent coords (0-100) to SVG pixel coords
+  const vw = () => size()?.width || 100
+  const vh = () => size()?.height || 100
+  const pctToSvg = (p) => `${p.x / 100 * vw()},${p.y / 100 * vh()}`
+
   return (
     <div
-      ref={containerRef}
-      class="relative w-full h-full overflow-hidden select-none"
+      ref={outerRef}
+      class="relative flex items-center justify-center w-full h-full bg-stone-800 overflow-hidden select-none"
     >
-      {/* Background image */}
-      <img
-        src="/garden.jpg"
-        alt="Garden map"
-        class="absolute inset-0 w-full h-full object-cover"
-        style="z-index: 0"
-        draggable={false}
-      />
-
-      {/* SVG polygon overlay */}
-      <svg
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        class="absolute inset-0 w-full h-full"
-        style="z-index: 1"
+      <div
+        ref={containerRef}
+        class="relative"
+        style={size() ? { width: `${size().width}px`, height: `${size().height}px` } : {}}
       >
-        <For each={props.beds}>
-          {(bed) => (
-            <BedPolygon
-              bed={bed}
-              selected={bed.id === props.selectedBedId}
-              onClick={(e) => {
-                const rect = containerRef.getBoundingClientRect()
-                const xPct = ((e.clientX - rect.left) / rect.width) * 100
-                props.onBedClick(bed.id, xPct)
-              }}
-            />
-          )}
-        </For>
+        <img
+          ref={imgEl}
+          src="/zahradky.png"
+          alt="Garden map"
+          class="block w-full h-full"
+          style="z-index: 0"
+          draggable={false}
+          onLoad={recalc}
+        />
 
-        <Show when={props.draftPoints.length > 0}>
-          <polygon
-            points={props.draftPoints.map((p) => `${p.x},${p.y}`).join(' ')}
-            fill="rgba(250,204,21,0.25)"
-            stroke="#fbbf24"
-            stroke-width="0.5"
-            stroke-dasharray="2 1"
-            style="pointer-events: none"
-          />
-          <For each={props.draftPoints}>
-            {(pt) => (
-              <circle
-                cx={pt.x}
-                cy={pt.y}
-                r="0.8"
-                fill="#fbbf24"
-                stroke="#ffffff"
-                stroke-width="0.3"
-                style="pointer-events: none"
+        <svg
+          viewBox={`0 0 ${vw()} ${vh()}`}
+          class="absolute inset-0 w-full h-full"
+          style="z-index: 1"
+        >
+          <For each={props.beds}>
+            {(bed) => (
+              <BedPolygon
+                bed={bed}
+                vw={vw()}
+                vh={vh()}
+                selected={bed.id === props.selectedBedId}
+                onClick={(e) => {
+                  const rect = containerRef.getBoundingClientRect()
+                  const xPct = ((e.clientX - rect.left) / rect.width) * 100
+                  props.onBedClick(bed.id, xPct)
+                }}
               />
             )}
           </For>
-        </Show>
-      </svg>
 
-      {/* Draw mode: transparent overlay captures clicks for placing points */}
+          <Show when={props.draftPoints.length > 0}>
+            <polygon
+              points={props.draftPoints.map(pctToSvg).join(' ')}
+              fill="rgba(250,204,21,0.25)"
+              stroke="#fbbf24"
+              stroke-width="2"
+              stroke-dasharray="8 4"
+              style="pointer-events: none"
+            />
+            <For each={props.draftPoints}>
+              {(pt) => (
+                <circle
+                  cx={pt.x / 100 * vw()}
+                  cy={pt.y / 100 * vh()}
+                  r="5"
+                  fill="#fbbf24"
+                  stroke="#ffffff"
+                  stroke-width="2"
+                  style="pointer-events: none"
+                />
+              )}
+            </For>
+          </Show>
+        </svg>
+
+        <Show when={props.drawMode}>
+          <div
+            class="absolute inset-0 cursor-crosshair"
+            style="z-index: 2"
+            onClick={handleDrawClick}
+          />
+        </Show>
+      </div>
+
       <Show when={props.drawMode}>
-        <div
-          class="absolute inset-0 cursor-crosshair"
-          style="z-index: 2"
-          onClick={handleDrawClick}
-        />
         <div
           class="absolute top-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-yellow-900 text-sm font-medium px-3 py-1 rounded-full shadow pointer-events-none"
           style="z-index: 3"

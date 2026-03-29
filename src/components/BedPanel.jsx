@@ -2,6 +2,7 @@ import BedForm from './BedForm.jsx'
 import PlantList from './PlantList.jsx'
 import { deleteBed } from '../store/gardenStore.js'
 import { t } from '../utils/i18n.js'
+import { isMobile } from '../utils/mobile.js'
 
 export default function BedPanel(props) {
   function handleDelete() {
@@ -13,14 +14,25 @@ export default function BedPanel(props) {
 
   return (
     <aside
-      class="absolute top-2 bottom-2 w-80 flex flex-col bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl overflow-y-auto border border-zinc-200/50 dark:border-zinc-700/50 transition-colors duration-200"
+      class="absolute flex flex-col bg-white dark:bg-zinc-900 shadow-2xl overflow-y-auto border border-zinc-200/50 dark:border-zinc-700/50 transition-colors duration-200"
       classList={{
-        'left-2': props.side === 'left',
-        'right-2': props.side !== 'left',
+        // Mobile: bottom sheet
+        'inset-x-0 bottom-0 rounded-t-2xl max-h-[70vh]': isMobile(),
+        // Desktop: side panel
+        'top-2 bottom-2 w-80 rounded-2xl': !isMobile(),
+        'left-2': !isMobile() && props.side === 'left',
+        'right-2': !isMobile() && props.side !== 'left',
       }}
       style="z-index: 5"
     >
-      <div class="flex items-center justify-between px-5 py-4">
+      {/* Drag handle on mobile */}
+      {isMobile() && (
+        <div class="flex justify-center pt-2 pb-1">
+          <div class="w-10 h-1 rounded-full bg-zinc-300 dark:bg-zinc-600" />
+        </div>
+      )}
+
+      <div class="flex items-center justify-between px-5 py-3 sm:py-4">
         <h2 class="text-base font-semibold text-zinc-900 dark:text-zinc-100 truncate">
           {props.bed.name}
         </h2>
@@ -41,7 +53,7 @@ export default function BedPanel(props) {
         <PlantList bed={props.bed} />
       </div>
 
-      <div class="px-5 py-4 border-t border-zinc-100 dark:border-zinc-800">
+      <div class="px-5 py-3 sm:py-4 border-t border-zinc-100 dark:border-zinc-800">
         <button
           onClick={handleDelete}
           class="cursor-pointer w-full text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg px-4 py-2.5 transition-colors duration-150"

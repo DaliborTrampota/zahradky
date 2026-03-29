@@ -4,8 +4,10 @@ import Toolbar from '../components/Toolbar.jsx'
 import GardenMap from '../components/GardenMap.jsx'
 import BedPanel from '../components/BedPanel.jsx'
 import { garden, addBed } from '../store/gardenStore.js'
+import { initMobileDetection } from '../utils/mobile.js'
 
 export default function MapPage() {
+  initMobileDetection()
   const [drawMode, setDrawMode] = createSignal(false)
   const [draftPoints, setDraftPoints] = createSignal([])
   const [selectedBedId, setSelectedBedId] = createSignal(null)

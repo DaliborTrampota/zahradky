@@ -1,45 +1,48 @@
 import { Show } from 'solid-js'
 import { isDark, toggleDark } from '../utils/darkMode.js'
 import { t, currentLang, toggleLang } from '../utils/i18n.js'
+import { isMobile } from '../utils/mobile.js'
 
 export default function Toolbar(props) {
   return (
-    <header class="flex items-center gap-3 px-5 h-14 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 shadow-md shrink-0 transition-colors duration-200">
-      <h1 class="text-lg font-semibold text-zinc-800 dark:text-zinc-100 tracking-tight mr-auto">
+    <header class="flex items-center gap-1.5 sm:gap-3 px-3 sm:px-5 h-12 sm:h-14 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 shadow-md shrink-0 transition-colors duration-200">
+      <h1 class="text-base sm:text-lg font-semibold text-zinc-800 dark:text-zinc-100 tracking-tight mr-auto truncate">
         {t('appTitle')}
       </h1>
 
-      <Show when={props.drawMode}>
-        <div class="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-full px-4 py-1.5">
-          <span class="text-sm font-medium text-amber-700 dark:text-amber-300">
-            {t('points', props.draftCount)}
-          </span>
-          <button
-            onClick={props.onFinishDraw}
-            disabled={props.draftCount < 3}
-            class="cursor-pointer bg-green-600 hover:bg-green-700 active:bg-green-800 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium px-4 py-1.5 rounded-full shadow-sm hover:shadow-md transition-all duration-150"
-          >
-            {t('finish')}
-          </button>
-        </div>
+      <Show when={!isMobile()}>
+        <Show when={props.drawMode}>
+          <div class="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-full px-4 py-1.5">
+            <span class="text-sm font-medium text-amber-700 dark:text-amber-300">
+              {t('points', props.draftCount)}
+            </span>
+            <button
+              onClick={props.onFinishDraw}
+              disabled={props.draftCount < 3}
+              class="cursor-pointer bg-green-600 hover:bg-green-700 active:bg-green-800 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium px-4 py-1.5 rounded-full shadow-sm hover:shadow-md transition-all duration-150"
+            >
+              {t('finish')}
+            </button>
+          </div>
+        </Show>
+
+        <button
+          onClick={props.onToggleDraw}
+          class="cursor-pointer text-sm font-medium px-5 py-2 rounded-full transition-all duration-150"
+          classList={{
+            'bg-amber-500 hover:bg-amber-600 text-white shadow-sm hover:shadow-md': props.drawMode,
+            'bg-green-600 hover:bg-green-700 active:bg-green-800 text-white shadow-sm hover:shadow-md': !props.drawMode,
+          }}
+        >
+          {props.drawMode ? t('cancel') : t('drawBed')}
+        </button>
+
+        <div class="w-px h-6 bg-zinc-200 dark:bg-zinc-700" />
       </Show>
 
       <button
-        onClick={props.onToggleDraw}
-        class="cursor-pointer text-sm font-medium px-5 py-2 rounded-full transition-all duration-150"
-        classList={{
-          'bg-amber-500 hover:bg-amber-600 text-white shadow-sm hover:shadow-md': props.drawMode,
-          'bg-green-600 hover:bg-green-700 active:bg-green-800 text-white shadow-sm hover:shadow-md': !props.drawMode,
-        }}
-      >
-        {props.drawMode ? t('cancel') : t('drawBed')}
-      </button>
-
-      <div class="w-px h-6 bg-zinc-200 dark:bg-zinc-700" />
-
-      <button
         onClick={props.onToggleLabels}
-        class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-150"
+        class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-150 shrink-0"
         classList={{
           'text-green-600 dark:text-green-400': props.showLabels,
           'text-zinc-400 dark:text-zinc-500': !props.showLabels,
@@ -54,7 +57,7 @@ export default function Toolbar(props) {
 
       <button
         onClick={toggleLang}
-        class="cursor-pointer h-9 px-2 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide transition-colors duration-150"
+        class="cursor-pointer h-9 px-2 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide transition-colors duration-150 shrink-0"
         title={currentLang() === 'cs' ? 'Switch to English' : 'Přepnout do češtiny'}
       >
         {currentLang() === 'cs' ? 'EN' : 'CZ'}
@@ -62,7 +65,7 @@ export default function Toolbar(props) {
 
       <button
         onClick={toggleDark}
-        class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 transition-colors duration-150"
+        class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 transition-colors duration-150 shrink-0"
         title={isDark() ? t('lightMode') : t('darkMode')}
       >
         <Show

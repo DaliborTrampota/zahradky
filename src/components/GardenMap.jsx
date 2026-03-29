@@ -37,14 +37,26 @@ export default function GardenMap(props) {
     e.preventDefault()
     if (e.ctrlKey || e.metaKey) {
       // Pinch-to-zoom on touchpad (or Ctrl+scroll with mouse)
+      // deltaY is continuous on touchpad — use it proportionally for smooth zoom
       const rect = outerRef.getBoundingClientRect()
       const mx = e.clientX - rect.left
       const my = e.clientY - rect.top
-      const factor = e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP
+      const factor = Math.pow(2, -e.deltaY / 100)
       applyZoom(factor, mx, my)
     } else {
       // Two-finger scroll → pan
       setPan((p) => ({ x: p.x - e.deltaX, y: p.y - e.deltaY }))
+    }
+  }
+
+  // The map is centered via flexbox. This returns the offset from
+  // the outer container's top-left to the map's top-left at zoom=1, pan=0.
+  function getCenterOffset() {
+    if (!size()) return { x: 0, y: 0 }
+    const outer = outerRef.getBoundingClientRect()
+    return {
+      x: (outer.width - size().width) / 2,
+      y: (outer.height - size().height) / 2,
     }
   }
 
@@ -57,10 +69,14 @@ export default function GardenMap(props) {
       setZoom(1)
       return
     }
+    // Convert pivot from outer-container coords to map-origin coords
+    const offset = getCenterOffset()
+    const mapPivotX = pivotX - offset.x
+    const mapPivotY = pivotY - offset.y
     const p = pan()
     setPan({
-      x: pivotX - (pivotX - p.x) * (newZ / oldZ),
-      y: pivotY - (pivotY - p.y) * (newZ / oldZ),
+      x: mapPivotX - (mapPivotX - p.x) * (newZ / oldZ),
+      y: mapPivotY - (mapPivotY - p.y) * (newZ / oldZ),
     })
     setZoom(newZ)
   }
@@ -104,6 +120,74 @@ export default function GardenMap(props) {
     window.removeEventListener('pointermove', handlePointerMove)
   }
 
+  // --- Touch: pinch-to-zoom + two-finger pan ---
+  let lastTouchDist = 0
+  let lastTouchCx = 0
+  let lastTouchCy = 0
+
+  function handleTouchStart(e) {
+    if (e.touches.length === 2) {
+      e.preventDefault()
+      const t1 = e.touches[0], t2 = e.touches[1]
+      const dx = t2.clientX - t1.clientX
+      const dy = t2.clientY - t1.clientY
+      lastTouchDist = Math.sqrt(dx * dx + dy * dy)
+      lastTouchCx = (t1.clientX + t2.clientX) / 2
+      lastTouchCy = (t1.clientY + t2.clientY) / 2
+    }
+  }
+
+  function handleTouchMove(e) {
+    if (e.touches.length !== 2) return
+    e.preventDefault()
+
+    const t1 = e.touches[0], t2 = e.touches[1]
+    const dx = t2.clientX - t1.clientX
+    const dy = t2.clientY - t1.clientY
+    const dist = Math.sqrt(dx * dx + dy * dy)
+    const cx = (t1.clientX + t2.clientX) / 2
+    const cy = (t1.clientY + t2.clientY) / 2
+
+    if (lastTouchDist > 0) {
+      const factor = dist / lastTouchDist
+      const oldZ = zoom()
+      const newZ = Math.min(Math.max(oldZ * factor, MIN_ZOOM), MAX_ZOOM)
+
+      // Pinch center relative to the outer container, adjusted for flex centering
+      const rect = outerRef.getBoundingClientRect()
+      const offset = getCenterOffset()
+      const mapPivotX = cx - rect.left - offset.x
+      const mapPivotY = cy - rect.top - offset.y
+
+      // Pan delta from finger movement
+      const panDx = cx - lastTouchCx
+      const panDy = cy - lastTouchCy
+
+      const p = pan()
+      if (newZ <= 1) {
+        setZoom(1)
+        setPan({ x: 0, y: 0 })
+      } else {
+        // Combined: zoom around pivot + pan from finger movement
+        setZoom(newZ)
+        setPan({
+          x: mapPivotX - (mapPivotX - p.x) * (newZ / oldZ) + panDx,
+          y: mapPivotY - (mapPivotY - p.y) * (newZ / oldZ) + panDy,
+        })
+      }
+    }
+
+    lastTouchDist = dist
+    lastTouchCx = cx
+    lastTouchCy = cy
+  }
+
+  function handleTouchEnd(e) {
+    if (e.touches.length < 2) {
+      lastTouchDist = 0
+    }
+  }
+
   // --- Draw click ---
   function handleDrawClick(e) {
     const rect = containerRef.getBoundingClientRect()
@@ -129,10 +213,13 @@ export default function GardenMap(props) {
   return (
     <div
       ref={outerRef}
-      class="relative flex items-center justify-center w-full h-full bg-zinc-900 dark:bg-zinc-950 overflow-hidden select-none transition-colors duration-200"
+      class="relative flex items-center justify-center w-full h-full bg-zinc-900 dark:bg-zinc-950 overflow-hidden select-none transition-colors duration-200 touch-none"
       classList={{ 'cursor-grab': !props.drawMode && !dragging, 'cursor-grabbing': dragging }}
       onWheel={handleWheel}
       onPointerDown={handlePointerDown}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       <div
         ref={containerRef}

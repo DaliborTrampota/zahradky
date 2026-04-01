@@ -91,22 +91,32 @@ export default function GardenMap(props) {
   let dragStart = { x: 0, y: 0 }
   let panStart = { x: 0, y: 0 }
   let dragMoved = false
+  let touchCount = 0
 
   function handlePointerDown(e) {
     if (props.drawMode) return
     if (e.button !== 0) return
-    // Only start drag from the map area itself, not from child controls
     if (e.target.closest('button')) return
+    // Track active touches — don't start drag if pinching
+    if (e.pointerType === 'touch') {
+      touchCount++
+      if (touchCount > 1) {
+        // Cancel any in-progress drag when second finger lands
+        dragging = false
+        window.removeEventListener('pointermove', handlePointerMove)
+        return
+      }
+    }
     dragging = true
     dragMoved = false
     dragStart = { x: e.clientX, y: e.clientY }
     panStart = { ...pan() }
     window.addEventListener('pointermove', handlePointerMove)
-    window.addEventListener('pointerup', handlePointerUp, { once: true })
+    window.addEventListener('pointerup', handlePointerUp)
   }
 
   function handlePointerMove(e) {
-    if (!dragging) return
+    if (!dragging || touchCount > 1) return
     const dx = e.clientX - dragStart.x
     const dy = e.clientY - dragStart.y
     if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragMoved = true
@@ -115,9 +125,14 @@ export default function GardenMap(props) {
     }
   }
 
-  function handlePointerUp() {
-    dragging = false
-    window.removeEventListener('pointermove', handlePointerMove)
+  function handlePointerUp(e) {
+    if (e.pointerType === 'touch') touchCount = Math.max(0, touchCount - 1)
+    if (touchCount <= 0) {
+      dragging = false
+      touchCount = 0
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerup', handlePointerUp)
+    }
   }
 
   // --- Touch: pinch-to-zoom + two-finger pan ---

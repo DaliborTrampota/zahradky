@@ -228,7 +228,7 @@ export default function GardenMap(props) {
       >
         <img
           ref={imgEl}
-          src="/zahradky.png"
+          src="/zahradky1.png"
           alt={t('gardenMap')}
           class="block w-full h-full"
           style="z-index: 0"

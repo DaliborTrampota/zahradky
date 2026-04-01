@@ -48,7 +48,7 @@ export default function BedForm(props) {
         <span class="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
           {t('color')}
         </span>
-        <div class="mt-2 flex gap-2 flex-wrap">
+        <div class="mt-2 flex gap-2 flex-wrap items-center">
           <For each={COLORS}>
             {(c) => (
               <button
@@ -62,6 +62,25 @@ export default function BedForm(props) {
               />
             )}
           </For>
+          <label
+            class="relative cursor-pointer w-8 h-8 rounded-full border-2 border-zinc-300 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-700 transition-all duration-150 hover:scale-110 hover:shadow-md overflow-hidden flex items-center justify-center"
+            classList={{
+              'border-zinc-800! dark:border-white! scale-110 shadow-md': !COLORS.includes(props.bed.color),
+            }}
+          >
+            <svg class="w-4 h-4 text-zinc-700 dark:text-zinc-200 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 22l1-1h3l9-9" />
+              <path d="M3 21v-3l9-9" />
+              <path d="M14.5 5.5l4-4a1.41 1.41 0 0 1 2 2l-4 4" />
+              <path d="M12 8l4 4" />
+            </svg>
+            <input
+              type="color"
+              class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+              value={props.bed.color || '#4ade80'}
+              onInput={(e) => update({ color: e.target.value })}
+            />
+          </label>
         </div>
       </div>
     </div>

@@ -13,7 +13,7 @@ export default function BedPolygon(props) {
   const pointsStr = () =>
     props.bed.points.map((p) => `${p.x / 100 * props.vw},${p.y / 100 * props.vh}`).join(' ')
 
-  const fillColor = () => props.bed.color + (props.selected ? 'aa' : '55')
+  const fillColor = () => props.bed.color + (props.selected ? '77' : '33')
   const center = () => centroid(props.bed.points, props.vw, props.vh)
   const title = () => props.bed.owner ? `${props.bed.name} - ${props.bed.owner}` : props.bed.name
 
@@ -29,7 +29,7 @@ export default function BedPolygon(props) {
         points={pointsStr()}
         fill={fillColor()}
         stroke={props.bed.color}
-        stroke-width={props.selected ? '3' : '2'}
+        stroke-width={(props.selected ? 3 : 2) / props.zoom}
       />
 
       {/* Label at centroid — scales inversely with zoom to stay constant screen size */}

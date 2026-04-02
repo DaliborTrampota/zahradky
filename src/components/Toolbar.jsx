@@ -1,15 +1,32 @@
-import { Show } from 'solid-js'
+import { createSignal, Show } from 'solid-js'
 import { useNavigate } from '@solidjs/router'
 import { isDark, toggleDark } from '../utils/darkMode.js'
 import { t, currentLang, toggleLang } from '../utils/i18n.js'
 import { isMobile } from '../utils/mobile.js'
-import { isAdmin, logout } from '../store/authStore.js'
+import { isAdmin, adminLogin, adminLogout } from '../store/authStore.js'
 
 export default function Toolbar(props) {
   const navigate = useNavigate()
+  const [showLogin, setShowLogin] = createSignal(false)
+  const [email, setEmail] = createSignal('')
+  const [password, setPassword] = createSignal('')
+  const [loginError, setLoginError] = createSignal('')
+
+  async function handleLogin(e) {
+    e.preventDefault()
+    setLoginError('')
+    try {
+      await adminLogin(email(), password())
+      setShowLogin(false)
+      setEmail('')
+      setPassword('')
+    } catch (err) {
+      setLoginError(err.message)
+    }
+  }
 
   return (
-    <header class="flex items-center gap-1.5 sm:gap-3 px-3 sm:px-5 h-12 sm:h-14 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 shadow-md shrink-0 transition-colors duration-200">
+    <header class="relative flex items-center gap-1.5 sm:gap-3 px-3 sm:px-5 h-12 sm:h-14 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 shadow-md shrink-0 transition-colors duration-200">
       <div class="flex items-center gap-2 mr-auto min-w-0">
         <img src="/logo.png" alt="Logo" class="w-7 h-7 sm:w-8 sm:h-8 shrink-0" />
         <h1 class="text-base sm:text-lg font-semibold text-zinc-800 dark:text-zinc-100 tracking-tight truncate">
@@ -100,15 +117,64 @@ export default function Toolbar(props) {
         </Show>
       </button>
 
-      <button
-        onClick={logout}
-        class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 transition-colors duration-150 shrink-0"
-        title={t('logout')}
+      {/* Admin login/logout */}
+      <Show
+        when={isAdmin()}
+        fallback={
+          <button
+            onClick={() => setShowLogin(!showLogin())}
+            class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 dark:text-zinc-600 transition-colors duration-150 shrink-0"
+            title="Admin"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+          </button>
+        }
       >
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3-3h-9m0 0l3-3m-3 3l3 3" />
-        </svg>
-      </button>
+        <button
+          onClick={adminLogout}
+          class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-green-600 dark:text-green-400 transition-colors duration-150 shrink-0"
+          title={t('logout')}
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75A2.25 2.25 0 003.75 21.75z" />
+          </svg>
+        </button>
+      </Show>
+
+      {/* Admin login dropdown */}
+      <Show when={showLogin()}>
+        <div class="absolute top-full right-3 mt-2 w-72 bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-700 p-4 z-50">
+          <form onSubmit={handleLogin} class="space-y-3">
+            <input
+              class="block w-full border border-zinc-300 dark:border-zinc-600 bg-transparent rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-green-500 dark:focus:border-green-400 focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400 transition-colors duration-150"
+              type="email"
+              placeholder="Email"
+              value={email()}
+              onInput={(e) => setEmail(e.target.value)}
+              required
+            />
+            <input
+              class="block w-full border border-zinc-300 dark:border-zinc-600 bg-transparent rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-green-500 dark:focus:border-green-400 focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400 transition-colors duration-150"
+              type="password"
+              placeholder={t('password')}
+              value={password()}
+              onInput={(e) => setPassword(e.target.value)}
+              required
+            />
+            {loginError() && (
+              <p class="text-xs text-red-500">{loginError()}</p>
+            )}
+            <button
+              type="submit"
+              class="cursor-pointer w-full bg-green-600 hover:bg-green-700 text-white rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150"
+            >
+              {t('login')}
+            </button>
+          </form>
+        </div>
+      </Show>
     </header>
   )
 }

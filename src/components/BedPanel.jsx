@@ -1,10 +1,50 @@
-import { Show } from 'solid-js'
+import { Show, For } from 'solid-js'
 import BedForm from './BedForm.jsx'
 import PlantList from './PlantList.jsx'
 import { deleteBed } from '../store/gardenStore.js'
 import { t } from '../utils/i18n.js'
 import { isMobile } from '../utils/mobile.js'
 import { isAdmin } from '../store/authStore.js'
+
+function BedInfo(props) {
+  const empty = '—'
+  return (
+    <div class="space-y-4">
+      <div>
+        <span class="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">{t('owner')}</span>
+        <p class="text-sm text-zinc-800 dark:text-zinc-200 mt-1">{props.bed.owner || empty}</p>
+      </div>
+      <div>
+        <span class="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">{t('bedType')}</span>
+        <p class="text-sm text-zinc-800 dark:text-zinc-200 mt-1">{props.bed.type ? t('bedTypes')[props.bed.type] : empty}</p>
+      </div>
+      <div>
+        <span class="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">{t('color')}</span>
+        <div class="mt-1.5 w-8 h-8 rounded-full" style={{ background: props.bed.color }} />
+      </div>
+      <div>
+        <span class="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">{t('plants')}</span>
+        <Show
+          when={props.bed.plants?.length > 0}
+          fallback={<p class="text-sm text-zinc-400 dark:text-zinc-500 italic mt-1">{t('noPlantsYet')}</p>}
+        >
+          <ul class="mt-2 space-y-1.5">
+            <For each={props.bed.plants}>
+              {(plant) => (
+                <li class="text-sm bg-zinc-50 dark:bg-zinc-800 rounded-xl px-3.5 py-2.5">
+                  <span class="font-medium text-zinc-800 dark:text-zinc-200">{plant.name}</span>
+                  <Show when={plant.datePlanted}>
+                    <span class="ml-2 text-zinc-400 dark:text-zinc-500 text-xs">{plant.datePlanted}</span>
+                  </Show>
+                </li>
+              )}
+            </For>
+          </ul>
+        </Show>
+      </div>
+    </div>
+  )
+}
 
 export default function BedPanel(props) {
   function handleDelete() {
@@ -50,9 +90,11 @@ export default function BedPanel(props) {
       </div>
 
       <div class="flex-1 px-5 pb-4 space-y-5">
-        <BedForm bed={props.bed} />
-        <div class="border-t border-zinc-100 dark:border-zinc-800" />
-        <PlantList bed={props.bed} />
+        <Show when={isAdmin()} fallback={<BedInfo bed={props.bed} />}>
+          <BedForm bed={props.bed} />
+          <div class="border-t border-zinc-100 dark:border-zinc-800" />
+          <PlantList bed={props.bed} />
+        </Show>
       </div>
 
       <Show when={isAdmin()}>

@@ -12,14 +12,12 @@ import { generateId } from '../utils/id.js'
 const [garden, setGarden] = createStore({ beds: [] })
 const [loading, setLoading] = createSignal(true)
 
-export { garden, loading }
-
-export async function initGarden() {
-  setLoading(true)
-  const data = await loadGarden()
+loadGarden().then((data) => {
   setGarden(data)
   setLoading(false)
-}
+})
+
+export { garden, loading }
 
 export const addBed = (points) => {
   const bed = {

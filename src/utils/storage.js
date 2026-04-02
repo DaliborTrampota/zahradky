@@ -61,6 +61,7 @@ function formatBed(row) {
     id: row.id,
     name: row.name,
     owner: row.owner,
+    type: row.type || '',
     color: row.color,
     points: row.points,
     plants: (row.plants || []).map((p) => ({

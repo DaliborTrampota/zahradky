@@ -24,6 +24,7 @@ export const addBed = (points) => {
     id: generateId(),
     name: 'New Bed',
     owner: '',
+    type: '',
     color: '#4ade80',
     points,
     plants: [],

@@ -2,6 +2,7 @@ create table beds (
   id uuid primary key,
   name text not null default 'New Bed',
   owner text not null default '',
+  type text not null default '',
   color text not null default '#4ade80',
   points jsonb not null default '[]',
   created_at timestamptz not null default now()

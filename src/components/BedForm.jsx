@@ -7,6 +7,13 @@ const COLORS = [
   '#a78bfa', '#fb923c', '#34d399', '#f472b6',
 ]
 
+const TYPE_COLORS = {
+  raised: '#fbbf24',
+  tree: '#4ade80',
+  flowers: '#f472b6',
+  herbs: '#34d399',
+}
+
 export default function BedForm(props) {
   const update = (patch) => updateBed(props.bed.id, patch)
 
@@ -42,6 +49,35 @@ export default function BedForm(props) {
         >
           {t('owner')}
         </label>
+      </div>
+
+      <div class="relative">
+        <select
+          class="block w-full border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-900 rounded-lg px-3.5 pt-5 pb-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-green-500 dark:focus:border-green-400 focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400 transition-colors duration-150 appearance-none cursor-pointer"
+          value={props.bed.type || ''}
+          onChange={(e) => {
+            const type = e.target.value
+            const patch = { type }
+            if (TYPE_COLORS[type]) patch.color = TYPE_COLORS[type]
+            update(patch)
+          }}
+          id="bed-type"
+        >
+          <option class="bg-white dark:bg-zinc-800" value="">{t('bedType')}...</option>
+          <option class="bg-white dark:bg-zinc-800" value="raised">{t('bedTypes').raised}</option>
+          <option class="bg-white dark:bg-zinc-800" value="tree">{t('bedTypes').tree}</option>
+          <option class="bg-white dark:bg-zinc-800" value="flowers">{t('bedTypes').flowers}</option>
+          <option class="bg-white dark:bg-zinc-800" value="herbs">{t('bedTypes').herbs}</option>
+        </select>
+        <label
+          for="bed-type"
+          class="absolute left-3 top-2 text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide pointer-events-none"
+        >
+          {t('bedType')}
+        </label>
+        <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+        </svg>
       </div>
 
       <div>

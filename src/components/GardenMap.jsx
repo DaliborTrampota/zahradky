@@ -15,6 +15,23 @@ export default function GardenMap(props) {
   const [size, setSize] = createSignal(null)
   const [zoom, setZoom] = createSignal(1)
   const [pan, setPan] = createSignal({ x: 0, y: 0 })
+  const [tooltip, setTooltip] = createSignal(null)
+
+  function handleBedHover(bed, e) {
+    if (!bed) { setTooltip(null); return }
+    const rect = outerRef.getBoundingClientRect()
+    setTooltip({
+      bed,
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    })
+  }
+
+  function handleMouseMoveForTooltip(e) {
+    if (!tooltip()) return
+    const rect = outerRef.getBoundingClientRect()
+    setTooltip((t) => t ? { ...t, x: e.clientX - rect.left, y: e.clientY - rect.top } : null)
+  }
 
   // --- Image sizing ---
   function recalc() {
@@ -236,6 +253,7 @@ export default function GardenMap(props) {
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onMouseMove={handleMouseMoveForTooltip}
     >
       <div
         ref={containerRef}
@@ -266,6 +284,8 @@ export default function GardenMap(props) {
                 zoom={zoom()}
                 showLabels={props.showLabels}
                 selected={bed.id === props.selectedBedId}
+                hoveredId={tooltip()?.bed?.id}
+                onHover={handleBedHover}
                 onClick={(e) => {
                   if (dragMoved) return
                   const rect = containerRef.getBoundingClientRect()
@@ -370,6 +390,43 @@ export default function GardenMap(props) {
         >
           {Math.round(zoom() * 100)}%
         </div>
+      </Show>
+
+      {/* Bed hover tooltip */}
+      <Show when={tooltip()}>
+        {(() => {
+          const tip = tooltip()
+          const bed = tip.bed
+          return (
+            <div
+              class="absolute pointer-events-none bg-white dark:bg-zinc-800 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-700 px-4 py-3 min-w-40 max-w-56"
+              style={{
+                'z-index': '20',
+                left: `${tip.x + 16}px`,
+                top: `${tip.y + 16}px`,
+              }}
+            >
+              <div class="flex items-center gap-2 mb-1">
+                <div class="w-3 h-3 rounded-full shrink-0" style={{ background: bed.color }} />
+                <span class="text-sm font-semibold text-zinc-800 dark:text-zinc-100 truncate">{bed.name}</span>
+              </div>
+              <Show when={bed.owner}>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400">{bed.owner}</p>
+              </Show>
+              <Show when={bed.plants?.length > 0}>
+                <ul class="mt-1.5 space-y-0.5">
+                  <For each={bed.plants}>
+                    {(plant) => (
+                      <li class="text-xs text-zinc-600 dark:text-zinc-300">
+                        {plant.name}
+                      </li>
+                    )}
+                  </For>
+                </ul>
+              </Show>
+            </div>
+          )
+        })()}
       </Show>
     </div>
   )

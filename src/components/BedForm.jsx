@@ -1,18 +1,12 @@
 import { For } from 'solid-js'
 import { updateBed } from '../store/gardenStore.js'
+import { typeColors } from '../store/typeColors.js'
 import { t } from '../utils/i18n.js'
 
 const COLORS = [
   '#4ade80', '#f87171', '#60a5fa', '#fbbf24',
   '#a78bfa', '#fb923c', '#34d399', '#f472b6',
 ]
-
-const TYPE_COLORS = {
-  raised: '#fbbf24',
-  tree: '#4ade80',
-  flowers: '#f472b6',
-  herbs: '#34d399',
-}
 
 export default function BedForm(props) {
   const update = (patch) => updateBed(props.bed.id, patch)
@@ -58,7 +52,7 @@ export default function BedForm(props) {
           onChange={(e) => {
             const type = e.target.value
             const patch = { type }
-            if (TYPE_COLORS[type]) patch.color = TYPE_COLORS[type]
+            if (typeColors[type]) patch.color = typeColors[type]
             update(patch)
           }}
           id="bed-type"

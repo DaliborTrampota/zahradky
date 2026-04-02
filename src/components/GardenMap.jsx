@@ -282,7 +282,7 @@ export default function GardenMap(props) {
                 vw={vw()}
                 vh={vh()}
                 zoom={zoom()}
-                showLabels={props.showLabels}
+                labelFields={props.labelFields}
                 selected={bed.id === props.selectedBedId}
                 hoveredId={tooltip()?.bed?.id}
                 onHover={handleBedHover}

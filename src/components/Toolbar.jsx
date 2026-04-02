@@ -8,6 +8,7 @@ import { isLoggedIn, isAdmin, login, logout } from '../store/authStore.js'
 export default function Toolbar(props) {
   const navigate = useNavigate()
   const [showLogin, setShowLogin] = createSignal(false)
+  const [showLabelMenu, setShowLabelMenu] = createSignal(false)
   const [email, setEmail] = createSignal('')
   const [password, setPassword] = createSignal('')
   const [loginError, setLoginError] = createSignal('')
@@ -65,13 +66,13 @@ export default function Toolbar(props) {
       </Show>
 
       <button
-        onClick={props.onToggleLabels}
+        onClick={() => setShowLabelMenu((v) => !v)}
         class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-150 shrink-0"
         classList={{
-          'text-green-600 dark:text-green-400': props.showLabels,
-          'text-zinc-400 dark:text-zinc-500': !props.showLabels,
+          'text-green-600 dark:text-green-400': Object.values(props.labelFields).some(Boolean),
+          'text-zinc-400 dark:text-zinc-500': !Object.values(props.labelFields).some(Boolean),
         }}
-        title={props.showLabels ? t('hideLabels') : t('showLabels')}
+        title={t('showLabels')}
       >
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
@@ -141,6 +142,38 @@ export default function Toolbar(props) {
             <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75A2.25 2.25 0 003.75 21.75z" />
           </svg>
         </button>
+      </Show>
+
+      {/* Label fields menu */}
+      <Show when={showLabelMenu()}>
+        <div class="absolute top-full left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-3 mt-2 w-48 bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-700 p-2 z-50">
+          {[
+            ['name', t('name')],
+            ['owner', t('owner')],
+            ['type', t('bedType')],
+            ['plants', t('plants')],
+          ].map(([field, label]) => (
+            <button
+              onClick={() => props.onToggleLabelField(field)}
+              class="cursor-pointer w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-150"
+            >
+              <div
+                class="w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors duration-150"
+                classList={{
+                  'bg-green-500 border-green-500': props.labelFields[field],
+                  'border-zinc-300 dark:border-zinc-600': !props.labelFields[field],
+                }}
+              >
+                <Show when={props.labelFields[field]}>
+                  <svg class="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </Show>
+              </div>
+              <span class="text-zinc-700 dark:text-zinc-200">{label}</span>
+            </button>
+          ))}
+        </div>
       </Show>
 
       {/* Login dropdown */}

@@ -6,9 +6,12 @@ import { isMobile } from '../utils/mobile.js'
 export default function Toolbar(props) {
   return (
     <header class="flex items-center gap-1.5 sm:gap-3 px-3 sm:px-5 h-12 sm:h-14 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 shadow-md shrink-0 transition-colors duration-200">
-      <h1 class="text-base sm:text-lg font-semibold text-zinc-800 dark:text-zinc-100 tracking-tight mr-auto truncate">
-        {t('appTitle')}
-      </h1>
+      <div class="flex items-center gap-2 mr-auto min-w-0">
+        <img src="/logo.png" alt="Logo" class="w-7 h-7 sm:w-8 sm:h-8 shrink-0" />
+        <h1 class="text-base sm:text-lg font-semibold text-zinc-800 dark:text-zinc-100 tracking-tight truncate">
+          {t('appTitle')}
+        </h1>
+      </div>
 
       <Show when={!isMobile()}>
         <Show when={props.drawMode}>

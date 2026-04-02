@@ -2,6 +2,7 @@ import { createSignal, onMount, onCleanup, For, Show } from 'solid-js'
 import BedPolygon from './BedPolygon.jsx'
 import { toPercent } from '../utils/coords.js'
 import { t } from '../utils/i18n.js'
+import { setMapReady } from '../store/appState.js'
 
 const MIN_ZOOM = 1
 const MAX_ZOOM = 6
@@ -248,7 +249,7 @@ export default function GardenMap(props) {
           class="block w-full h-full"
           style="z-index: 0"
           draggable={false}
-          onLoad={recalc}
+          onLoad={() => { recalc(); setMapReady(true) }}
         />
 
         <svg

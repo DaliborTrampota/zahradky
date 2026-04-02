@@ -1,8 +1,10 @@
+import { Show } from 'solid-js'
 import BedForm from './BedForm.jsx'
 import PlantList from './PlantList.jsx'
 import { deleteBed } from '../store/gardenStore.js'
 import { t } from '../utils/i18n.js'
 import { isMobile } from '../utils/mobile.js'
+import { isAdmin } from '../store/authStore.js'
 
 export default function BedPanel(props) {
   function handleDelete() {
@@ -53,14 +55,16 @@ export default function BedPanel(props) {
         <PlantList bed={props.bed} />
       </div>
 
-      <div class="px-5 py-3 sm:py-4 border-t border-zinc-100 dark:border-zinc-800">
-        <button
-          onClick={handleDelete}
-          class="cursor-pointer w-full text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg px-4 py-2.5 transition-colors duration-150"
-        >
-          {t('deleteBed')}
-        </button>
-      </div>
+      <Show when={isAdmin()}>
+        <div class="px-5 py-3 sm:py-4 border-t border-zinc-100 dark:border-zinc-800">
+          <button
+            onClick={handleDelete}
+            class="cursor-pointer w-full text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg px-4 py-2.5 transition-colors duration-150"
+          >
+            {t('deleteBed')}
+          </button>
+        </div>
+      </Show>
     </aside>
   )
 }

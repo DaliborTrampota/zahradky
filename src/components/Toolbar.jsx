@@ -3,6 +3,7 @@ import { useNavigate } from '@solidjs/router'
 import { isDark, toggleDark } from '../utils/darkMode.js'
 import { t, currentLang, toggleLang } from '../utils/i18n.js'
 import { isMobile } from '../utils/mobile.js'
+import { isAdmin, logout } from '../store/authStore.js'
 
 export default function Toolbar(props) {
   const navigate = useNavigate()
@@ -16,7 +17,7 @@ export default function Toolbar(props) {
         </h1>
       </div>
 
-      <Show when={!isMobile()}>
+      <Show when={!isMobile() && isAdmin()}>
         <Show when={props.drawMode}>
           <div class="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-full px-4 py-1.5">
             <span class="text-sm font-medium text-amber-700 dark:text-amber-300">
@@ -97,6 +98,16 @@ export default function Toolbar(props) {
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
           </svg>
         </Show>
+      </button>
+
+      <button
+        onClick={logout}
+        class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 transition-colors duration-150 shrink-0"
+        title={t('logout')}
+      >
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3-3h-9m0 0l3-3m-3 3l3 3" />
+        </svg>
       </button>
     </header>
   )

@@ -21,6 +21,7 @@ const translations = {
     noPlantsYet: 'Zatím žádné rostliny',
     plantName: 'Název rostliny',
     removePlant: 'Odebrat rostlinu',
+    confirmRemovePlant: (name) => `Odebrat rostlinu "${name}"?`,
     addPlant: 'Přidat rostlinu',
     bedType: 'Typ',
     bedTypes: {
@@ -58,6 +59,7 @@ const translations = {
     noPlantsYet: 'No plants yet',
     plantName: 'Plant name',
     removePlant: 'Remove plant',
+    confirmRemovePlant: (name) => `Remove plant "${name}"?`,
     addPlant: 'Add plant',
     bedType: 'Type',
     bedTypes: {

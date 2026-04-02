@@ -31,7 +31,11 @@ export default function PlantList(props) {
                 <span class="ml-2 text-zinc-400 dark:text-zinc-500 text-xs">{plant.datePlanted}</span>
               </div>
               <button
-                onClick={() => removePlant(props.bed.id, plant.id)}
+                onClick={() => {
+                  if (confirm(t('confirmRemovePlant', plant.name))) {
+                    removePlant(props.bed.id, plant.id)
+                  }
+                }}
                 class="cursor-pointer w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 text-zinc-300 dark:text-zinc-600 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-150 ml-2 shrink-0"
                 title={t('removePlant')}
               >

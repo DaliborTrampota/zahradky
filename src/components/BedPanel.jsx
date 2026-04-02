@@ -4,7 +4,7 @@ import PlantList from './PlantList.jsx'
 import { deleteBed } from '../store/gardenStore.js'
 import { t } from '../utils/i18n.js'
 import { isMobile } from '../utils/mobile.js'
-import { isAdmin } from '../store/authStore.js'
+import { isLoggedIn, isAdmin } from '../store/authStore.js'
 
 function BedInfo(props) {
   const empty = '—'
@@ -90,7 +90,7 @@ export default function BedPanel(props) {
       </div>
 
       <div class="flex-1 px-5 pb-4 space-y-5">
-        <Show when={isAdmin()} fallback={<BedInfo bed={props.bed} />}>
+        <Show when={isLoggedIn()} fallback={<BedInfo bed={props.bed} />}>
           <BedForm bed={props.bed} />
           <div class="border-t border-zinc-100 dark:border-zinc-800" />
           <PlantList bed={props.bed} />

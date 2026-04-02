@@ -1,6 +1,7 @@
-import { For, Show } from 'solid-js'
+import { createSignal, For, Show } from 'solid-js'
 import { useNavigate } from '@solidjs/router'
 import { typeColors, setTypeColor, resetTypeColors } from '../store/typeColors.js'
+import { isLoggedIn, changePassword } from '../store/authStore.js'
 import { isDark, toggleDark } from '../utils/darkMode.js'
 import { t, currentLang, toggleLang } from '../utils/i18n.js'
 
@@ -8,6 +9,22 @@ const BED_TYPES = ['raised', 'tree', 'flowers', 'herbs']
 
 export default function AdminPage() {
   const navigate = useNavigate()
+  const [newPass, setNewPass] = createSignal('')
+  const [passMsg, setPassMsg] = createSignal('')
+  const [passError, setPassError] = createSignal('')
+
+  async function handleChangePassword(e) {
+    e.preventDefault()
+    setPassMsg('')
+    setPassError('')
+    try {
+      await changePassword(newPass())
+      setNewPass('')
+      setPassMsg(t('passwordChanged'))
+    } catch (err) {
+      setPassError(err.message)
+    }
+  }
 
   return (
     <div class="min-h-screen bg-zinc-100 dark:bg-zinc-950 transition-colors duration-200">
@@ -86,6 +103,42 @@ export default function AdminPage() {
             {t('resetDefaults')}
           </button>
         </section>
+
+        <Show when={isLoggedIn()}>
+          <section>
+            <h2 class="text-sm font-semibold text-zinc-800 dark:text-zinc-200 uppercase tracking-wide mb-4">
+              {t('changePassword')}
+            </h2>
+            <form onSubmit={handleChangePassword} class="space-y-3">
+              <div class="relative">
+                <input
+                  class="peer block w-full border border-zinc-300 dark:border-zinc-600 bg-transparent rounded-lg px-3.5 pt-5 pb-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-green-500 dark:focus:border-green-400 focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400 transition-colors duration-150"
+                  type="password"
+                  value={newPass()}
+                  onInput={(e) => setNewPass(e.target.value)}
+                  placeholder=" "
+                  id="new-password"
+                  required
+                  minLength={6}
+                />
+                <label
+                  for="new-password"
+                  class="absolute left-3 top-2 text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide pointer-events-none"
+                >
+                  {t('newPassword')}
+                </label>
+              </div>
+              {passMsg() && <p class="text-sm text-green-600 dark:text-green-400">{passMsg()}</p>}
+              {passError() && <p class="text-sm text-red-600 dark:text-red-400">{passError()}</p>}
+              <button
+                type="submit"
+                class="cursor-pointer w-full bg-green-600 hover:bg-green-700 active:bg-green-800 text-white rounded-lg px-4 py-2.5 text-sm font-medium shadow-sm hover:shadow-md transition-all duration-150"
+              >
+                {t('changePassword')}
+              </button>
+            </form>
+          </section>
+        </Show>
       </div>
     </div>
   )

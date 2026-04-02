@@ -32,7 +32,7 @@ create trigger on_auth_user_created
   for each row execute procedure public.handle_new_user();
 
 -- =============================================================
--- beds: anyone can read, only admin can write
+-- beds: anyone reads, logged-in users edit, admin creates/deletes
 -- =============================================================
 
 drop policy if exists "Allow all access to beds" on beds;
@@ -40,13 +40,11 @@ drop policy if exists "Allow all access to beds" on beds;
 create policy "Anyone can read beds"
   on beds for select using (true);
 
+create policy "Authenticated can update beds"
+  on beds for update using (auth.role() = 'authenticated');
+
 create policy "Admin can insert beds"
   on beds for insert with check (
-    exists (select 1 from profiles where id = auth.uid() and role = 'admin')
-  );
-
-create policy "Admin can update beds"
-  on beds for update using (
     exists (select 1 from profiles where id = auth.uid() and role = 'admin')
   );
 
@@ -56,7 +54,7 @@ create policy "Admin can delete beds"
   );
 
 -- =============================================================
--- plants: anyone can read, only admin can write
+-- plants: anyone reads, logged-in users can add/edit/remove
 -- =============================================================
 
 drop policy if exists "Allow all access to plants" on plants;
@@ -64,20 +62,14 @@ drop policy if exists "Allow all access to plants" on plants;
 create policy "Anyone can read plants"
   on plants for select using (true);
 
-create policy "Admin can insert plants"
-  on plants for insert with check (
-    exists (select 1 from profiles where id = auth.uid() and role = 'admin')
-  );
+create policy "Authenticated can insert plants"
+  on plants for insert with check (auth.role() = 'authenticated');
 
-create policy "Admin can update plants"
-  on plants for update using (
-    exists (select 1 from profiles where id = auth.uid() and role = 'admin')
-  );
+create policy "Authenticated can update plants"
+  on plants for update using (auth.role() = 'authenticated');
 
-create policy "Admin can delete plants"
-  on plants for delete using (
-    exists (select 1 from profiles where id = auth.uid() and role = 'admin')
-  );
+create policy "Authenticated can delete plants"
+  on plants for delete using (auth.role() = 'authenticated');
 
 -- =============================================================
 -- beds_dev: same as beds
@@ -88,13 +80,11 @@ drop policy if exists "Allow all access to beds_dev" on beds_dev;
 create policy "Anyone can read beds_dev"
   on beds_dev for select using (true);
 
+create policy "Authenticated can update beds_dev"
+  on beds_dev for update using (auth.role() = 'authenticated');
+
 create policy "Admin can insert beds_dev"
   on beds_dev for insert with check (
-    exists (select 1 from profiles where id = auth.uid() and role = 'admin')
-  );
-
-create policy "Admin can update beds_dev"
-  on beds_dev for update using (
     exists (select 1 from profiles where id = auth.uid() and role = 'admin')
   );
 
@@ -112,20 +102,14 @@ drop policy if exists "Allow all access to plants_dev" on plants_dev;
 create policy "Anyone can read plants_dev"
   on plants_dev for select using (true);
 
-create policy "Admin can insert plants_dev"
-  on plants_dev for insert with check (
-    exists (select 1 from profiles where id = auth.uid() and role = 'admin')
-  );
+create policy "Authenticated can insert plants_dev"
+  on plants_dev for insert with check (auth.role() = 'authenticated');
 
-create policy "Admin can update plants_dev"
-  on plants_dev for update using (
-    exists (select 1 from profiles where id = auth.uid() and role = 'admin')
-  );
+create policy "Authenticated can update plants_dev"
+  on plants_dev for update using (auth.role() = 'authenticated');
 
-create policy "Admin can delete plants_dev"
-  on plants_dev for delete using (
-    exists (select 1 from profiles where id = auth.uid() and role = 'admin')
-  );
+create policy "Authenticated can delete plants_dev"
+  on plants_dev for delete using (auth.role() = 'authenticated');
 
 -- =============================================================
 -- SETUP: After running this, create your admin user in Supabase

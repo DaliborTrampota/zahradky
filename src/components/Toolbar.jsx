@@ -3,7 +3,7 @@ import { useNavigate } from '@solidjs/router'
 import { isDark, toggleDark } from '../utils/darkMode.js'
 import { t, currentLang, toggleLang } from '../utils/i18n.js'
 import { isMobile } from '../utils/mobile.js'
-import { isAdmin, adminLogin, adminLogout } from '../store/authStore.js'
+import { isLoggedIn, isAdmin, login, logout } from '../store/authStore.js'
 
 export default function Toolbar(props) {
   const navigate = useNavigate()
@@ -16,7 +16,7 @@ export default function Toolbar(props) {
     e.preventDefault()
     setLoginError('')
     try {
-      await adminLogin(email(), password())
+      await login(email(), password())
       setShowLogin(false)
       setEmail('')
       setPassword('')
@@ -117,14 +117,14 @@ export default function Toolbar(props) {
         </Show>
       </button>
 
-      {/* Admin login/logout */}
+      {/* Login/logout */}
       <Show
-        when={isAdmin()}
+        when={isLoggedIn()}
         fallback={
           <button
             onClick={() => setShowLogin(!showLogin())}
             class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 dark:text-zinc-600 transition-colors duration-150 shrink-0"
-            title="Admin"
+            title={t('login')}
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
@@ -133,7 +133,7 @@ export default function Toolbar(props) {
         }
       >
         <button
-          onClick={adminLogout}
+          onClick={logout}
           class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-green-600 dark:text-green-400 transition-colors duration-150 shrink-0"
           title={t('logout')}
         >
@@ -143,7 +143,7 @@ export default function Toolbar(props) {
         </button>
       </Show>
 
-      {/* Admin login dropdown */}
+      {/* Login dropdown */}
       <Show when={showLogin()}>
         <div class="absolute top-full right-3 mt-2 w-72 bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-700 p-4 z-50">
           <form onSubmit={handleLogin} class="space-y-3">

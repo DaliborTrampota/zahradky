@@ -1,7 +1,7 @@
 import { createSignal, onMount } from 'solid-js'
 import { useNavigate } from '@solidjs/router'
 import { supabase } from '../utils/supabase.js'
-import { t } from '../utils/i18n.js'
+import { t, currentLang, toggleLang } from '../utils/i18n.js'
 import { setMapReady } from '../store/appState.js'
 
 export default function InvitePage() {
@@ -53,9 +53,17 @@ export default function InvitePage() {
   return (
     <div class="min-h-screen flex items-center justify-center bg-zinc-100 dark:bg-zinc-950 px-4">
       <div class="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl shadow-lg border border-zinc-200 dark:border-zinc-800 p-8">
-        <h1 class="text-xl font-semibold text-zinc-800 dark:text-zinc-100 mb-1">
-          {t('setPassword')}
-        </h1>
+        <div class="flex items-center justify-between mb-4">
+          <h1 class="text-xl font-semibold text-zinc-800 dark:text-zinc-100">
+            {t('setPassword')}
+          </h1>
+          <button
+            onClick={toggleLang}
+            class="cursor-pointer h-9 px-2 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide transition-colors duration-150"
+          >
+            {currentLang() === 'cs' ? 'EN' : 'CZ'}
+          </button>
+        </div>
         <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-6">
           {t('setPasswordHint')}
         </p>

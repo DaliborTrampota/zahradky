@@ -44,6 +44,12 @@ const translations = {
     resetView: 'Obnovit pohled',
     zoomIn: 'Přiblížit',
     zoomOut: 'Oddálit',
+    setPassword: 'Nastavit heslo',
+    setPasswordHint: 'Byl(a) jste pozván(a). Nastavte si heslo pro přístup.',
+    confirmPassword: 'Potvrdit heslo',
+    passwordMismatch: 'Hesla se neshodují',
+    passwordTooShort: 'Heslo musí mít alespoň 6 znaků',
+    saving: 'Ukládám…',
   },
   en: {
     appTitle: 'Zahrádky Strahov',
@@ -88,6 +94,12 @@ const translations = {
     resetView: 'Reset view',
     zoomIn: 'Zoom in',
     zoomOut: 'Zoom out',
+    setPassword: 'Set password',
+    setPasswordHint: 'You have been invited. Set a password to access the app.',
+    confirmPassword: 'Confirm password',
+    passwordMismatch: 'Passwords do not match',
+    passwordTooShort: 'Password must be at least 6 characters',
+    saving: 'Saving…',
   },
 }
 
